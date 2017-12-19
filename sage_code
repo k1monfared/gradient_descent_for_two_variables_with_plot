@@ -1,0 +1,106 @@
+def gradient_descent_for_two_variables(X, Y, theta_0=0, theta_1=0, alpha=10^(-2), max_iter=10^3, min_tol=10^(-4), min_cost=10^(-3)):
+    # X and Y are two lists of the same size
+    # alhpa is the learning rate 
+    # max_iter is the maximum number of iterations for the gradient descent
+    # min_tol is the minimum of the differences in updating the parameters the process terminates if this maximum of the differences in updating theta_0 and theta_1 is less than min_tol
+    # min_cost is the minimum acceptable cost, if the cost function goes below this, then the iteration stops
+    
+    m = len(X)
+    
+    # check length of X and Y are equal:
+    if m != len(Y):
+        raise ValueError('The two input lists are not of the same length.')
+    
+    
+        
+    # for an initial guess pick two random inputs and find the slope of the secant line:
+    #a = 0
+    #b = 0
+    #while a == b: # this is to make sure that my initial guess is not a vertical line!
+    #    a = Integer(randint(0,m-1))
+    #    b = Integer(randint(0,m-1))
+    #theta_1 = (Y[b] - Y[a]) / (X[b] - X[a])
+    #theta_0 = -theta_1 * X[a] + Y[a]
+    
+    
+    # here comes the gradient descent iteration for the least squares cost function
+    converged = 0
+    count = 0
+    failed = 0
+    
+    while converged + failed == 0:
+        h_theta(x) = theta_1 * x + theta_0
+        
+        #print(float(theta_1),float(theta_0))
+        
+        #compute new theta's
+        temp_theta_0 = theta_0 - (alpha/m) * (sum([h_theta(X[i]) - Y[i] for i in range(m)]))
+        temp_theta_1 = theta_1 - (alpha/m) * (sum([(h_theta(X[i]) - Y[i]) * X[i] for i in range(m)]))
+        
+        # update stopping criterias 
+        count += 1
+        tol = max(abs(theta_0 - temp_theta_0), abs(theta_1 - temp_theta_1))
+        cost = (sum([(h_theta(X[i]) - Y[i])^2 ])) / (2*m)
+        
+        #print('count,tol,cost:')
+        #print(count,float(tol),float(cost))
+        #print('--')
+        
+        #update old theta's
+        theta_0 = temp_theta_0
+        theta_1 = temp_theta_1
+        
+        ## termination criteria
+        # number of iterations
+        if count == max_iter:
+            failed = 1
+        
+
+        # diverged
+        if str(abs(float(theta_0))) == 'inf':
+            failed = 1
+        if str(abs(float(theta_1))) == 'inf':
+            failed = 1
+        if str(float(cost)) == 'inf':
+            failed = 1
+        if str(abs(float(tol))) == 'inf':
+            failed = 1
+        
+        # tolerance
+        if tol < min_tol:
+            converged = 1
+        
+        # cost
+        if cost < min_cost:
+            converged = 1
+    
+    # communicate the output results
+    if failed == 1:
+        print('The process did not converge in %s iterations. The final cost fucnction value is %s.' %(count,float(cost)))
+    else:
+        print('The process converged in %s iterations, and with a cost function value of %s.' %(count,float(cost)))
+    print('The regression line is y = %s x + %s.' %(float(theta_1), float(theta_0)))
+    
+    # let's plot things
+    P = [(X[i], Y[i]) for i in range(m)]
+    points_plot = points(P,size=40)
+    rng = max(X) - min(X)
+    a = min(X) - rng/10
+    b = max(X) + rng/10
+    regression_plot = line([(a, theta_1 * a + theta_0),(b, theta_1 * b + theta_0)], thickness = 3, rgbcolor=(1,0,0))
+    vertical_errors = [line([(X[i],Y[i]),(X[i], theta_1 * X[i] + theta_0)], thickness=2, rgbcolor=(.7,.7,.7)) for i in range(m)]
+    vertical_lines_plot = sum(vertical_errors)
+    (vertical_lines_plot+points_plot+regression_plot).show()
+    
+    
+    
+    # return the output
+    return([float(theta_1), float(theta_0)])
+    
+## sample run no. 1
+m,b = gradient_descent_for_two_variables([1,2,3],[3,5,5])
+
+## sample run no. 2
+X = [1,2,3,4,5,6,7,8,9,10]
+Y = [10,12,15,17,16,19,20,25,24,27]
+m,b = gradient_descent_for_two_variables(X,Y)
